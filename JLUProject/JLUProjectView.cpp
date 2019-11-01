@@ -254,10 +254,10 @@ void CJLUProjectView::BresenhamCircle(CDC* pdc)
 
 void CJLUProjectView::MidpointEllipse(CDC* pdc)
 {
-	int _m = (int)fabs(endPoint.x - startPoint.x);
-	int _n = (int)fabs(endPoint.y - startPoint.y);
-	int majorAxis = _m / 2; //长轴
-	int shortAxis = _n / 2; //短轴
+	long long _m = (int)fabs(endPoint.x - startPoint.x);
+	long long _n = (int)fabs(endPoint.y - startPoint.y);
+	long long majorAxis = _m / 2; //长轴
+	long long shortAxis = _n / 2; //短轴
 	int midX = startPoint.x + (endPoint.x - startPoint.x) / 2; //椭圆圆心点坐标
 	int midY = startPoint.y + (endPoint.y - startPoint.y) / 2;
 	int x = 0;
