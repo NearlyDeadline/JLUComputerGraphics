@@ -31,10 +31,10 @@ BEGIN_MESSAGE_MAP(CJLUProjectView, CView)
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
-	ON_COMMAND(ID_BUTTONELLIPSE, &CJLUProjectView::OnButtonellipse)
-	ON_COMMAND(ID_BUTTONCIRCLE, &CJLUProjectView::OnButtoncircle)
-	ON_COMMAND(ID_BUTTONLINE, &CJLUProjectView::OnButtonline)
-	ON_COMMAND(ID_BUTTONDEFAULT, &CJLUProjectView::OnButtondefault)
+	ON_COMMAND(ID_BUTTONELLIPSE, &CJLUProjectView::OnButtonEllipse)
+	ON_COMMAND(ID_BUTTONCIRCLE, &CJLUProjectView::OnButtonCircle)
+	ON_COMMAND(ID_BUTTONLINE, &CJLUProjectView::OnButtonLine)
+	ON_COMMAND(ID_BUTTONDEFAULT, &CJLUProjectView::OnButtonDefault)
 END_MESSAGE_MAP()
 
 // CJLUProjectView 构造/析构
@@ -43,7 +43,7 @@ CJLUProjectView::CJLUProjectView() noexcept
 {
 	// TODO: 在此处添加构造代码
 
-	isStartedToDraw = 0;
+	IsStartedToDraw = 0;
 }
 
 CJLUProjectView::~CJLUProjectView()
@@ -117,23 +117,23 @@ CJLUProjectDoc* CJLUProjectView::GetDocument() const // 非调试版本是内联
 void CJLUProjectView::OnDrawSetcolor()
 {
 	SetColor dia;
-	dia.m_r = ColorR;
-	dia.m_g = ColorG;
-	dia.m_b = ColorB;
+	dia.m_r = _ColorR;
+	dia.m_g = _ColorG;
+	dia.m_b = _ColorB;
 	if (dia.DoModal() == IDOK) {
-		ColorR = dia.m_r;
-		ColorG = dia.m_g;
-		ColorB = dia.m_b;
+		_ColorR = dia.m_r;
+		_ColorG = dia.m_g;
+		_ColorB = dia.m_b;
 	}
 }
 
 
 void CJLUProjectView::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	if (drawType > 0) {
-		isStartedToDraw = 1;
-		startPoint = point;
-		endPoint = point;
+	if (DrawType > 0) {
+		IsStartedToDraw = 1;
+		_StartPoint = point;
+		_EndPoint = point;
 	}	
 	CView::OnLButtonDown(nFlags, point);
 }
@@ -141,8 +141,8 @@ void CJLUProjectView::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CJLUProjectView::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	if (drawType > 0) {
-		isStartedToDraw = 0;
+	if (DrawType > 0) {
+		IsStartedToDraw = 0;
 	}
 	CView::OnLButtonUp(nFlags, point);
 }
@@ -150,24 +150,24 @@ void CJLUProjectView::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CJLUProjectView::OnRButtonDown(UINT nFlags, CPoint point)
 {
-	if (isStartedToDraw > 0) {
+	if (IsStartedToDraw > 0) {
 		CDC* pdc = this->GetDC();
 		pdc->SetROP2(R2_NOTXORPEN);
 		DrawThing(pdc); //覆盖掉最后一次画的图
 		ReleaseDC(pdc);
 	}
-	isStartedToDraw = 0;
+	IsStartedToDraw = 0;
 	CView::OnRButtonDown(nFlags, point);
 }
 
 
 void CJLUProjectView::OnMouseMove(UINT nFlags, CPoint point)
 {
-	if (drawType > 0 && isStartedToDraw > 0) {
+	if (DrawType > 0 && IsStartedToDraw > 0) {
 		CDC* pdc = this->GetDC();
 		pdc->SetROP2(R2_NOTXORPEN);
 		DrawThing(pdc); //覆盖掉上一次画的图
-		endPoint = point;
+		_EndPoint = point;
 		DrawThing(pdc); //画一个新图
 		ReleaseDC(pdc);
 	}
@@ -175,36 +175,51 @@ void CJLUProjectView::OnMouseMove(UINT nFlags, CPoint point)
 }
 
 
-void CJLUProjectView::OnButtonellipse()
+void CJLUProjectView::OnButtonEllipse()
 {
-	drawType = 3;
+	DrawType = 3;
 }
 
 
-void CJLUProjectView::OnButtoncircle()
+void CJLUProjectView::OnButtonCircle()
 {
-	drawType = 2;
+	DrawType = 2;
 }
 
 
-void CJLUProjectView::OnButtonline()
+void CJLUProjectView::OnButtonLine()
 {
-	drawType = 1;
+	DrawType = 1;
 }
 
 
 void CJLUProjectView::DrawThing(CDC* pdc)
 {
-	switch (drawType) {
-	case 1: DDALine(pdc); break;
-	case 2: BresenhamCircle(pdc); break;
-	case 3: MidpointEllipse(pdc); break;
+	switch (DrawType) {
+	case 1: DDALine(pdc, _StartPoint, _EndPoint, RGB(_ColorR, _ColorG, _ColorB));
+		break;
+	case 2: BresenhamCircle(pdc, CPoint(_StartPoint), 
+		(int)sqrt((_EndPoint.x - _StartPoint.x)*(_EndPoint.x - _StartPoint.x) + (_EndPoint.y - _StartPoint.y)*(_EndPoint.y - _StartPoint.y)),
+		RGB(_ColorR, _ColorG, _ColorB));
+		break;
+//int x1 = _startPoint.x;
+//int x2 = _endPoint.x;
+//int y1 = _startPoint.y;
+//int y2 = _endPoint.y;
+//int radius = (int)sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+	case 3: MidpointEllipse(pdc, CPoint(_StartPoint.x + (_EndPoint.x - _StartPoint.x) / 2, _StartPoint.y + (_EndPoint.y - _StartPoint.y) / 2),
+		(long long)fabs(_EndPoint.x - _StartPoint.x) / 2, (long long)fabs(_EndPoint.y - _StartPoint.y) / 2, RGB(_ColorR, _ColorG, _ColorB));
+		break;
+//long long semiMajorAxis = (int)fabs(_endPoint.x - _startPoint.x) / 2; //半长轴
+//long long semiShortAxis = (int)fabs(_endPoint.y - _startPoint.y) / 2; //半短轴
+//int midX = _startPoint.x + (_endPoint.x - _startPoint.x) / 2; //椭圆圆心点坐标
+//int midY = _startPoint.y + (_endPoint.y - _startPoint.y) / 2;
 	default: break;
 	}
 }
 
 
-void CJLUProjectView::DDALine(CDC* pdc)
+void CJLUProjectView::DDALine(CDC* pdc, CPoint startPoint, CPoint endPoint, COLORREF color)
 {
 	double dx = endPoint.x - startPoint.x;
 	double dy = endPoint.y - startPoint.y;
@@ -214,32 +229,37 @@ void CJLUProjectView::DDALine(CDC* pdc)
 	double x = startPoint.x;
 	double y = startPoint.y;
 	for (int i = 1; i <= e; ++i) {
-		pdc->SetPixel((int)(x + 0.5), (int)(y + 0.5), RGB(ColorR, ColorG, ColorB));
+		pdc->SetPixel((int)(x + 0.5), (int)(y + 0.5), color);
 		x += dx;
 		y += dy;
 	}
 }
 
 
-void CJLUProjectView::BresenhamCircle(CDC* pdc)
+void CJLUProjectView::BresenhamCircle(CDC* pdc, CPoint center, int radius, COLORREF color)
 {
-	int x1 = startPoint.x;
-	int x2 = endPoint.x;
-	int y1 = startPoint.y;
-	int y2 = endPoint.y;
-	int radius = (int)sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+	int x1 = center.x;
+	int y1 = center.y;
 	int x = 0;
 	int y = radius;
 	int p = 3 - 2 * radius;
+	pdc->SetPixel(-x + center.x, y + center.y, color);
+	pdc->SetPixel(x + center.x, -y + center.y, color);
+	pdc->SetPixel(-y + center.x, x + center.y, color);
+	pdc->SetPixel(y + center.x, -x + center.y, color);
+	//防止对称性造成的一些点(正上方、正下方、正左方、正右方）二次着色而产生视觉上的缺点现象，额外着色一次
 	while (x <= y) {
-		pdc->SetPixel(x1 + x, y1 + y, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(x1 - x, y1 + y, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(x1 + x, y1 - y, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(x1 - x, y1 - y, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(x1 + y, y1 + x, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(x1 - y, y1 + x, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(x1 + y, y1 - x, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(x1 - y, y1 - x, RGB(ColorR, ColorG, ColorB));
+		if (x != y) {
+			pdc->SetPixel(x1 + x, y1 + y, color);
+			pdc->SetPixel(x1 + y, y1 - x, color);
+			pdc->SetPixel(x1 - y, y1 + x, color);
+			pdc->SetPixel(x1 - y, y1 - x, color);
+			//防止对称性造成的一些点(左上、右上、左下、右下）二次着色而产生视觉上的缺点现象，只着色一次
+		}
+		pdc->SetPixel(x1 + x, y1 - y, color);
+		pdc->SetPixel(x1 - x, y1 + y, color);
+		pdc->SetPixel(x1 - x, y1 - y, color);
+		pdc->SetPixel(x1 + y, y1 + x, color);
 		if (p >= 0) {
 			p += 4 * (x - y) + 10;
 			y--;
@@ -252,57 +272,53 @@ void CJLUProjectView::BresenhamCircle(CDC* pdc)
 }
 
 
-void CJLUProjectView::MidpointEllipse(CDC* pdc)
+void CJLUProjectView::MidpointEllipse(CDC* pdc, CPoint center, long long semiMajorAxis, long long semiShortAxis, COLORREF color)
 {
-	long long _m = (int)fabs(endPoint.x - startPoint.x);
-	long long _n = (int)fabs(endPoint.y - startPoint.y);
-	long long majorAxis = _m / 2; //长轴
-	long long shortAxis = _n / 2; //短轴
-	int midX = startPoint.x + (endPoint.x - startPoint.x) / 2; //椭圆圆心点坐标
-	int midY = startPoint.y + (endPoint.y - startPoint.y) / 2;
 	int x = 0;
-	int y = shortAxis;
-	double d1 = shortAxis * shortAxis + majorAxis * majorAxis * (-shortAxis + 0.25);
-	pdc->SetPixel(midX + x, midY + y, RGB(ColorR, ColorG, ColorB));
-	pdc->SetPixel(midX - x, midY + y, RGB(ColorR, ColorG, ColorB));
-	pdc->SetPixel(midX + x, midY - y, RGB(ColorR, ColorG, ColorB));
-	pdc->SetPixel(midX - x, midY - y, RGB(ColorR, ColorG, ColorB));
-	while (shortAxis*shortAxis * (x + 1) < majorAxis * majorAxis * (y - 0.5)) {
+	int y = semiShortAxis;
+	double d1 = semiShortAxis * semiShortAxis + semiMajorAxis * semiMajorAxis * (-semiShortAxis + 0.25);
+	pdc->SetPixel(center.x + x, center.y + y, color);
+	pdc->SetPixel(center.x + x, center.y - y, color);
+	//防止对称性造成的一些点(正上方、正下方）二次着色而产生视觉上的缺点现象，少着色一次
+	while (semiShortAxis*semiShortAxis * (x + 1) < semiMajorAxis * semiMajorAxis * (y - 0.5)) {
 		if (d1 < 0) {
-			d1 += shortAxis * shortAxis * (2 * x + 3);
+			d1 += semiShortAxis * semiShortAxis * (2 * x + 3);
 			x++;
 		}
 		else {
-			d1 += shortAxis * shortAxis * (2 * x + 3) + majorAxis * majorAxis * (-2 * y + 2);
+			d1 += semiShortAxis * semiShortAxis * (2 * x + 3) + semiMajorAxis * semiMajorAxis * (-2 * y + 2);
 			x++;
 			y--;
 		}
-		pdc->SetPixel(midX + x, midY + y, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(midX - x, midY + y, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(midX + x, midY - y, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(midX - x, midY - y, RGB(ColorR, ColorG, ColorB));
+		pdc->SetPixel(center.x + x, center.y + y, color);
+		pdc->SetPixel(center.x - x, center.y + y, color);
+		pdc->SetPixel(center.x + x, center.y - y, color);
+		pdc->SetPixel(center.x - x, center.y - y, color);
 	}
-	double d2 = shortAxis * shortAxis * (x + 0.5)*(x + 0.5) + majorAxis * majorAxis *(y - 1) *(y - 1) - shortAxis * shortAxis * majorAxis * majorAxis;
+	double d2 = semiShortAxis * semiShortAxis * (x + 0.5)*(x + 0.5) + semiMajorAxis * semiMajorAxis *(y - 1) *(y - 1) - semiShortAxis * semiShortAxis * semiMajorAxis * semiMajorAxis;
 	while (y > 0) {
 		if (d2 < 0) {
-			d2 += shortAxis * shortAxis * (2 * x + 2) + majorAxis * majorAxis * (-2 * y + 3);
+			d2 += semiShortAxis * semiShortAxis * (2 * x + 2) + semiMajorAxis * semiMajorAxis * (-2 * y + 3);
 			x++;
 			y--;
 		}
 		else {
-			d2 += majorAxis * majorAxis * (-2 * y + 3);
+			d2 += semiMajorAxis * semiMajorAxis * (-2 * y + 3);
 			y--;
 		}
-		pdc->SetPixel(midX + x, midY + y, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(midX - x, midY + y, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(midX + x, midY - y, RGB(ColorR, ColorG, ColorB));
-		pdc->SetPixel(midX - x, midY - y, RGB(ColorR, ColorG, ColorB));
+		pdc->SetPixel(center.x + x, center.y + y, color);
+		pdc->SetPixel(center.x - x, center.y + y, color);
+		pdc->SetPixel(center.x + x, center.y - y, color);
+		pdc->SetPixel(center.x - x, center.y - y, color);
 	}
+	pdc->SetPixel(center.x + x, center.y, color);
+	pdc->SetPixel(center.x - x, center.y, color);
+	//防止对称性造成的一些点(正左方、正右方）二次着色而产生视觉上的缺点现象，额外着色一次
 }
 
 
-void CJLUProjectView::OnButtondefault()
+void CJLUProjectView::OnButtonDefault()
 {
-	drawType = 0;
-	isStartedToDraw = 0;
+	DrawType = 0;
+	IsStartedToDraw = 0;
 }

@@ -43,27 +43,27 @@ protected:
 public:
 	afx_msg void OnDrawSetcolor();
 protected:
-	int ColorR = 0;
-	int ColorG = 0;
-	int ColorB = 0;
+	int _ColorR = 0;
+	int _ColorG = 0;
+	int _ColorB = 0;
 
-	int drawType = 0; //0代表未画图，大于0的值表示处于画图状态中（按了一个图形键）
-	int isStartedToDraw = 0; //1代表按下左键，拖拽鼠标以确定终点中；0代表未处于上述状态
+	int DrawType = 0; //0代表未画图，大于0的值表示处于画图状态中（按了一个图形键）
+	int IsStartedToDraw = 0; //1代表按下左键，拖拽鼠标以确定终点中；0代表未处于上述状态
 	void DrawThing(CDC* pdc);
-	CPoint startPoint; //开始点
-	CPoint endPoint; //终点
+	CPoint _StartPoint; //开始点
+	CPoint _EndPoint; //终点
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnButtonellipse();
-	afx_msg void OnButtoncircle();
-	afx_msg void OnButtonline();
-	void DDALine(CDC* pdc);
-	void BresenhamCircle(CDC* pdc);
-	void MidpointEllipse(CDC* pdc);
-	afx_msg void OnButtondefault();
+	afx_msg void OnButtonEllipse();
+	afx_msg void OnButtonCircle();
+	afx_msg void OnButtonLine();
+	void DDALine(CDC* pdc, CPoint startPoint, CPoint endPoint, COLORREF color); //pdc, 线段始点, 线段终点, 颜色
+	void BresenhamCircle(CDC* pdc, CPoint center, int radius, COLORREF color); //pdc, 圆心, 半径, 颜色
+	void MidpointEllipse(CDC* pdc, CPoint center, long long semiMajorAxis, long long semiShortAxis, COLORREF color); // pdc, 圆心, 半长轴, 半短轴, 颜色
+	afx_msg void OnButtonDefault();
 };
 
 #ifndef _DEBUG  // JLUProjectView.cpp 中的调试版本
