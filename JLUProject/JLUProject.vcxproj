@@ -187,6 +187,7 @@
     <ClInclude Include="JLUProjectDoc.h" />
     <ClInclude Include="JLUProjectView.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MapObject.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SetColor.h" />
     <ClInclude Include="stdafx.h" />
@@ -197,6 +198,7 @@
     <ClCompile Include="JLUProjectDoc.cpp" />
     <ClCompile Include="JLUProjectView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="MapObject.cpp" />
     <ClCompile Include="SetColor.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

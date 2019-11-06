@@ -49,7 +49,7 @@ protected:
 
 	int DrawType = 0; //0代表未画图，大于0的值表示处于画图状态中（按了一个图形键）
 	int IsStartedToDraw = 0; //1代表按下左键，拖拽鼠标以确定终点中；0代表未处于上述状态
-	void DrawThing(CDC* pdc);
+	//void DrawThing(CDC* pdc);
 	CPoint _StartPoint; //开始点
 	CPoint _EndPoint; //终点
 public:
@@ -64,6 +64,10 @@ public:
 	void BresenhamCircle(CDC* pdc, CPoint center, int radius, COLORREF color); //pdc, 圆心, 半径, 颜色
 	void MidpointEllipse(CDC* pdc, CPoint center, long long semiMajorAxis, long long semiShortAxis, COLORREF color); // pdc, 圆心, 半长轴, 半短轴, 颜色
 	afx_msg void OnButtonDefault();
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
+	void Move(CPoint* point, int x, int y);
 };
 
 #ifndef _DEBUG  // JLUProjectView.cpp 中的调试版本

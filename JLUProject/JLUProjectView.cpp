@@ -35,6 +35,9 @@ BEGIN_MESSAGE_MAP(CJLUProjectView, CView)
 	ON_COMMAND(ID_BUTTONCIRCLE, &CJLUProjectView::OnButtonCircle)
 	ON_COMMAND(ID_BUTTONLINE, &CJLUProjectView::OnButtonLine)
 	ON_COMMAND(ID_BUTTONDEFAULT, &CJLUProjectView::OnButtonDefault)
+	ON_WM_LBUTTONDBLCLK()
+	ON_WM_KEYDOWN()
+	ON_WM_KEYUP()
 END_MESSAGE_MAP()
 
 // CJLUProjectView 构造/析构
@@ -60,14 +63,33 @@ BOOL CJLUProjectView::PreCreateWindow(CREATESTRUCT& cs)
 
 // CJLUProjectView 绘图
 
-void CJLUProjectView::OnDraw(CDC* /*pDC*/)
+void CJLUProjectView::OnDraw(CDC* pDC)
 {
 	CJLUProjectDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return;
-
-	// TODO: 在此处为本机数据添加绘制代码
+	switch (DrawType) {
+	case 1: DDALine(pDC, _StartPoint, _EndPoint, RGB(_ColorR, _ColorG, _ColorB));
+		break;
+	case 2: BresenhamCircle(pDC, CPoint(_StartPoint),
+		(int)sqrt((_EndPoint.x - _StartPoint.x)*(_EndPoint.x - _StartPoint.x) + (_EndPoint.y - _StartPoint.y)*(_EndPoint.y - _StartPoint.y)),
+		RGB(_ColorR, _ColorG, _ColorB));
+		break;
+		//int x1 = _startPoint.x;
+		//int x2 = _endPoint.x;
+		//int y1 = _startPoint.y;
+		//int y2 = _endPoint.y;
+		//int radius = (int)sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+	case 3: MidpointEllipse(pDC, CPoint(_StartPoint.x + (_EndPoint.x - _StartPoint.x) / 2, _StartPoint.y + (_EndPoint.y - _StartPoint.y) / 2),
+		(long long)fabs(_EndPoint.x - _StartPoint.x) / 2, (long long)fabs(_EndPoint.y - _StartPoint.y) / 2, RGB(_ColorR, _ColorG, _ColorB));
+		break;
+		//long long semiMajorAxis = (int)fabs(_endPoint.x - _startPoint.x) / 2; //半长轴
+		//long long semiShortAxis = (int)fabs(_endPoint.y - _startPoint.y) / 2; //半短轴
+		//int midX = _startPoint.x + (_endPoint.x - _startPoint.x) / 2; //椭圆圆心点坐标
+		//int midY = _startPoint.y + (_endPoint.y - _startPoint.y) / 2;
+	default: break;
+	}
 }
 
 
@@ -153,7 +175,7 @@ void CJLUProjectView::OnRButtonDown(UINT nFlags, CPoint point)
 	if (IsStartedToDraw > 0) {
 		CDC* pdc = this->GetDC();
 		pdc->SetROP2(R2_NOTXORPEN);
-		DrawThing(pdc); //覆盖掉最后一次画的图
+		OnDraw(pdc); //覆盖掉最后一次画的图
 		ReleaseDC(pdc);
 	}
 	IsStartedToDraw = 0;
@@ -166,9 +188,9 @@ void CJLUProjectView::OnMouseMove(UINT nFlags, CPoint point)
 	if (DrawType > 0 && IsStartedToDraw > 0) {
 		CDC* pdc = this->GetDC();
 		pdc->SetROP2(R2_NOTXORPEN);
-		DrawThing(pdc); //覆盖掉上一次画的图
+		OnDraw(pdc); //覆盖掉上一次画的图
 		_EndPoint = point;
-		DrawThing(pdc); //画一个新图
+		OnDraw(pdc); //画一个新图
 		ReleaseDC(pdc);
 	}
 	CView::OnMouseMove(nFlags, point);
@@ -192,7 +214,7 @@ void CJLUProjectView::OnButtonLine()
 	DrawType = 1;
 }
 
-
+/*
 void CJLUProjectView::DrawThing(CDC* pdc)
 {
 	switch (DrawType) {
@@ -217,7 +239,7 @@ void CJLUProjectView::DrawThing(CDC* pdc)
 	default: break;
 	}
 }
-
+*/
 
 void CJLUProjectView::DDALine(CDC* pdc, CPoint startPoint, CPoint endPoint, COLORREF color)
 {
@@ -321,4 +343,34 @@ void CJLUProjectView::OnButtonDefault()
 {
 	DrawType = 0;
 	IsStartedToDraw = 0;
+}
+
+
+void CJLUProjectView::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
+	CView::OnLButtonDblClk(nFlags, point);
+}
+
+
+void CJLUProjectView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	
+	CView::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+
+void CJLUProjectView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
+	CView::OnKeyUp(nChar, nRepCnt, nFlags);
+}
+
+
+void CJLUProjectView::Move(CPoint* point, int x, int y)
+{
+	// TODO: 在此处添加实现代码.
 }
